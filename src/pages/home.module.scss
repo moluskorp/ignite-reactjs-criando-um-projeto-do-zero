@@ -1,1 +1,80 @@
-// TODO
+.container{
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.posts {
+  max-width: 720px;
+  margin: 5rem auto 0;
+
+  a {
+    display: block;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--title);
+
+    & + a {
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--content);
+    }
+
+    transition: color 0.2s;
+
+  }
+
+  &:hover a {
+    color: var(--highlight);
+  }
+
+  p{
+    margin-top: 0.5rem;
+    color: var(--content);
+    font-size: 1.125rem;
+  }
+
+
+
+  time {
+    display: flex;
+    align-items: center;
+    color: var(--info);
+  }
+
+  strong {
+    display: flex;
+    align-items: center;
+    color: var(--info);
+  }
+}
+
+.info{
+  margin-top: 1.4rem;
+  font-size: 0.875rem;
+
+  display: flex;
+
+  strong {
+    margin-left: 3rem;
+  }
+}
+
+.loadPosts{
+  margin: 4rem 10.5rem 0;
+
+  .active{
+    color: var(--highlight);
+    cursor: pointer;
+    transition: filter 0.2s;
+
+    &:hover{
+      filter: brightness(0.7);
+    }
+  }
+
+  .inactive{
+    color: #fff;
+  }
+}
+

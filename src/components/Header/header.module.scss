@@ -1,1 +1,19 @@
-// TODO
+.headerContainer {
+  height: 10rem;
+}
+
+.headerContent{
+  height: 10rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+
+  img{
+    padding-bottom: 1rem;
+    margin-right: 30rem;
+  cursor: pointer;
+
+  }
+}
