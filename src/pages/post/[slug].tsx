@@ -1,15 +1,19 @@
 import { GetStaticPaths, GetStaticProps } from 'next';
 import { RichText } from 'prismic-dom';
+import Link from 'next/link';
 import { format } from 'date-fns';
+import Prismic from '@prismicio/client';
 import ptBR from 'date-fns/locale/pt-BR';
 import { useRouter } from 'next/router';
 
 import { getPrismicClient } from '../../services/prismic';
 
 import styles from './post.module.scss';
+import Comments from '../../components/Comments';
 
 interface Post {
   first_publication_date: string | null;
+  last_publication_date: string | null;
   data: {
     slug?: string;
     title: string;
@@ -26,19 +30,29 @@ interface Post {
   };
 }
 
-interface PostProps {
-  post: Post;
+interface PreviousNextPost {
+  uid: string;
+  data: {
+    title: string;
+  };
 }
 
-export default function Post({ post }: PostProps) {
+interface PostProps {
+  post: Post;
+  nextPost: PreviousNextPost;
+  previousPost: PreviousNextPost;
+}
+
+export default function Post({ post, nextPost, previousPost }: PostProps) {
   const router = useRouter();
+  const createdAt = new Date(post.first_publication_date);
+  const updatedAt = new Date(post.last_publication_date);
 
   if (router.isFallback) {
     return <div>Carregando...</div>;
   }
   return (
     <>
-      {console.log(post.data.content)}
       <div className={styles.image}>
         <img
           className={styles.postImage}
@@ -57,6 +71,12 @@ export default function Post({ post }: PostProps) {
           <p>{post.data.author}</p>
           <p>4 min</p>
         </div>
+        {updatedAt > createdAt ? (
+          <div className={styles.edittedInfo}>
+            <p>OI</p>
+          </div>
+        ) : null}
+
         <div className={styles.post}>
           {post.data.content.map(content => {
             const contentHtml = RichText.asHtml(content.body);
@@ -68,6 +88,31 @@ export default function Post({ post }: PostProps) {
             );
           })}
         </div>
+        <div className={styles.changePost}>
+          <div className={styles.contentChangePost}>
+            {previousPost ? (
+              <>
+                <div className={styles.previousPost}>
+                  <p>{previousPost.data.title}</p>
+                  <Link href={`/post/${previousPost.uid}`}>
+                    <a>Post anterior</a>
+                  </Link>
+                </div>
+              </>
+            ) : null}
+          </div>
+          <div className={styles.contentChangePost}>
+            {nextPost ? (
+              <div className={styles.nextPost}>
+                <p>{nextPost.data.title}</p>
+                <Link href={`/post/${nextPost.uid}`}>
+                  <a>Próximo post</a>
+                </Link>
+              </div>
+            ) : null}
+          </div>
+        </div>
+        <Comments />
       </div>
     </>
   );
@@ -97,16 +142,31 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 
   const response = await prismic.getByUID('posts', String(slug), {});
 
-  const newContent = response.data.content.map(content => {
-    const contentHtml = RichText.asHtml(content.body);
-    return {
-      heading: content.heading,
-      body: contentHtml,
-    };
-  });
+  const responseNext = await prismic.query(
+    [Prismic.predicates.at('document.type', 'posts')],
+    {
+      fetch: ['publication.title', 'publication.content'],
+      pageSize: 1,
+      page: 1,
+      orderings: '[document.first_publication_date]',
+      after: response.id,
+    }
+  );
+
+  const responsePrevious = await prismic.query(
+    [Prismic.predicates.at('document.type', 'posts')],
+    {
+      fetch: ['publication.title', 'publication.content'],
+      pageSize: 1,
+      page: 1,
+      orderings: '[document.first_publication_date desc]',
+      after: response.id,
+    }
+  );
 
   const post = {
     first_publication_date: response.first_publication_date,
+    last_publication_date: response.last_publication_date,
     uid: response.uid,
     data: {
       title: response.data.title,
@@ -120,8 +180,17 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     },
   };
 
+  console.log(post);
+
+  const nextPost = responseNext.results[0];
+  const previousPost = responsePrevious.results[0];
+
   return {
-    props: { post },
+    props: {
+      post,
+      nextPost: nextPost || null,
+      previousPost: previousPost || null,
+    },
     revalidate: 60 * 30, // 30 minutes
   };
 };

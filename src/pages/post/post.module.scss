@@ -1,10 +1,12 @@
 .image{
     max-height: 25rem;
     max-width: 1120px;
+    margin: 0 auto;
     display: flex;
     align-items: center;
     justify-content: center;
     background-size: cover;
+
   .postImage {
     max-height: 25rem;
 
@@ -52,4 +54,41 @@
   strong{
     font-weight: 700;
   }
+}
+
+.changePost {
+  display: flex;
+  justify-content: space-between;
+
+  padding-top: 5rem;
+  margin-top: 3rem;
+  margin-bottom: 4.5rem;
+  border-top: 1px solid #D7D7D7;
+
+  p{
+    font-size: 1.125rem;
+    color: var(--title);
+    margin-bottom: 0.3rem;
+  }
+
+  a{
+    font-weight: 600;
+  }
+
+  div {
+    display: flex;
+    flex-direction: column;
+  }
+
+}
+
+.previousPost{
+  a{
+    color: var(--highlight);
+  }
+}
+
+.nextPost{
+  align-self: flex-end;
+  color: var(--highlight);
 }
